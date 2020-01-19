@@ -1,64 +1,76 @@
 
 <div class="container-fluid p-5">
     <h1>Bootcamp Enrollment Form</h1>
-    <form #userForm="ngForm">
-
+    <form #userForm="ngForm" *ngIf="!submittedForm" (ngSubmit)="onSubmit()" novalidate>
+        {{ userForm.form.valid}}
+        <hr />
         {{ userForm.value | json}}
+        <hr />
+        {{ userModel | json}}
+        <br><br><br><br>
 
         <div ngModelGroup="address">
             <div class="form-group">
                 <label>Street</label>
-                <input type="text" class="form-control" name="userStreet" ngModel>
+                <input type="text" #street="ngModel" class="form-control" name="userStreet" [(ngModel)]="userModel.street" required>
             </div>
+            <p>{{street.untouched}}, {{street.valid}}, {{street.dirty}}</p>
             <div class="form-group">
                 <label>City</label>
-                <input type="text" class="form-control" name="userCity" ngModel>
+                <input type="text" #city="ngModel" [class.is-invalid]="city.invalid && city.touched" class="form-control" name="userCity" [(ngModel)]="userModel.city" required>
+                <small class="text-danger" [class.d-none]="city.valid || city.untouched">City is required</small>
             </div>
             <div class="form-group">
                 <label>Province</label>
-                <input type="text" class="form-control" name="userProvince" ngModel>
+                <input type="text" #province="ngModel" [class.is-invalid]="province.invalid && province.touched" pattern="^\w{2}$" class="form-control" name="userProvince" [(ngModel)]="userModel.province" required>
+                <!-- <small class="text-danger" [class.d-none]="type.valid || type.untouched">Province is required</small> -->
+                <div *ngIf="province.errors && (province.invalid || province.touched)">
+                    <small class="text-danger" *ngIf="province.errors.required">Province is required</small> 
+                    <small class="text-danger" *ngIf="province.errors.pattern">Province must be two digits</small> 
+                </div>
             </div>
             <div class="form-group">
                 <label>Postal Code</label>
-                <input type="text" class="form-control" name="userPostalCode" ngModel>
+                <input type="text" class="form-control" name="userPostalCode" [(ngModel)]="userModel.postalCode" required>
             </div>
-        </div>
+        </div> 
 
         <div class="form-group">
             <label>Name</label>
-            <input type="text" class="form-control" name="userName" ngModel>
+            <input type="text" #name1 class="form-control" name="userName" [(ngModel)]="userModel.name" required>
         </div>
+        {{name1.className}}
         <div class="form-group">
             <label>Email</label>
-            <input type="email" class="form-control" name="userEmail" ngModel>
+            <input type="email" #email="ngModel" [class.is-invalid]="email.invalid && email.touched" class="form-control is-invalid" name="userEmail" [(ngModel)]="userModel.email" required>
         </div>
         <div class="form-group">
             <label>Phone</label>
-            <input type="tel" class="form-control" name="userPhone" ngModel>
+            <input type="tel" #phone="ngModel" pattern="^\d{10}$" [class.is-invalid]="phone.invalid && phone.touched" class="form-control" name="userPhone" [(ngModel)]="userModel.phone" required>
         </div>
         <div class="form-group">
             <label>Topics</label>
-            <select class="custom-select" name="userTopic" ngModel>
-                <option selected>I am interested in</option>
+            <select (blur)="validateTopic(topic.value)" (change)="validateTopic(topic.value)" class="custom-select" name="userTopic" [(ngModel)]="userModel.topic" #topic="ngModel" [class.is-invalid]="topicHasError && topic.touched" required>
+                <option value="default">I am interested in</option>
                 <option *ngFor="let topic of topics">{{topic}}</option>
             </select>
+            <small class="text-danger" [class.d-none]="!topicHasError || topic.untouched">Please choose a topic</small>                     
         </div>
         <div class="mb-3">
             <label>Time Preferences</label>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="timePreferences" value="morning" ngModel>
+                <input class="form-check-input" type="radio" name="timePreferences" value="morning" [(ngModel)]="userModel.preference" required>
                 <label class="form-check-label">Morning (9AM - 12 PM)</label>
             </div>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="timePreferences" value="evening" ngModel>
+                <input class="form-check-input" type="radio" name="timePreferences" value="evening" [(ngModel)]="userModel.preference" required>
                 <label class="form-check-label">Evening (5pm - 8pm)</label>
             </div>
         </div>
         <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" name="userOffer" ngModel>
+            <input class="form-check-input" type="checkbox" name="userOffer" [(ngModel)]="userModel.subscribe">
             <label class="form-check-label">Send me promotional offers</label>
         </div>
-        <button class="btn btn-primary" type="submit">Submit Form</button>
+        <button class="btn btn-primary" type="submit" [disabled]='userForm.form.invalid || topicHasError'>Submit Form</button>
     </form>
-
 </div>
